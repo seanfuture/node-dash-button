@@ -44,7 +44,7 @@ var register = function(mac_addresses, arp_interface, timeout) {
          * Perform a try/catch on packet decoding until pcap
          * offers a non-throwing mechanism to listen for errors
          * (We're just ignoring these errors because TCP packets with an
-         *  unknown offset should have no impact on this application) 
+         *  unknown offset should have no impact on this application)
          *
          * See https://github.com/mranney/node_pcap/issues/153
          */
@@ -58,13 +58,13 @@ var register = function(mac_addresses, arp_interface, timeout) {
         if(packet.payload.ethertype === 2054) { //ensures it is an arp packet
             //for element in the mac addresses array
             mac_addresses.forEach(function(mac_address){
-                if(!just_emitted[mac_address] && 
-                    _.isEqual(packet.payload.payload.sender_ha.addr, 
+                if(!just_emitted[mac_address] &&
+                    _.isEqual(packet.payload.payload.sender_ha.addr,
                              hex_to_int_array(mac_address))) {
-                    readStream.emit('detected', mac_address);
+                    readStream.emit('detected', mac_address, packet);
                     just_emitted[mac_address] = true;
                     setTimeout(function () { just_emitted[mac_address] = false; }, timeout);
-                }                
+                }
             });
         }
     });
@@ -72,14 +72,14 @@ var register = function(mac_addresses, arp_interface, timeout) {
 };
 
 if (process.env.NODE_ENV === 'test') {
-    
-    
-    module.exports = {  hex_to_int_array: hex_to_int_array, 
+
+
+    module.exports = {  hex_to_int_array: hex_to_int_array,
                         int_array_to_hex: int_array_to_hex,
                         create_session: create_session,
                         register: register
                     };
-    
+
 } else {
     module.exports = register;
 }
